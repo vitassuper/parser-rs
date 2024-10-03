@@ -1,9 +1,9 @@
-pub mod arithmetic_binary_expression;
-pub mod arithmetic_unary_expression;
 pub mod ast_node;
+pub mod binary_arithmetic_expression;
+pub mod binary_comparison_expression;
 pub mod binary_expression;
-pub mod comparison_binary_expression;
+pub mod binary_logical_expression;
 pub mod literal;
-pub mod logical_binary_expression;
+pub mod unary_arithmetic_expression;
 pub mod unary_expression;
 pub mod variable;

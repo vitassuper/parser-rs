@@ -1,5 +1,5 @@
-use std::fmt::Display;
 use crate::operator::Operator;
+use std::fmt::Display;
 
 #[derive(Debug, PartialEq)]
 pub enum Token {

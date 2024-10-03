@@ -1,8 +1,10 @@
-use crate::node::ast_node::AstNode;
-use crate::operator::Operator;
+use crate::node::binary_arithmetic_expression::ArithmeticBinaryExpression;
+use crate::node::binary_comparison_expression::ComparisonBinaryExpression;
+use crate::node::binary_logical_expression::LogicalBinaryExpression;
 
-pub trait BinaryExpression: AstNode {
-    fn new(left: Box<dyn AstNode>, operator: Operator, right: Box<dyn AstNode>) -> Self
-    where
-        Self: Sized;
+#[derive(Debug)]
+pub enum BinaryExpression {
+    BinaryArithmeticExpression(ArithmeticBinaryExpression),
+    BinaryComparisonExpression(ComparisonBinaryExpression),
+    BinaryLogicalExpression(LogicalBinaryExpression),
 }

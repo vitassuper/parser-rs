@@ -1,10 +1,15 @@
 use crate::error::ParserError;
-use crate::node::arithmetic_binary_expression::ArithmeticBinaryExpression;
-use crate::node::arithmetic_unary_expression::ArithmeticUnaryExpression;
 use crate::node::ast_node::AstNode;
-use crate::node::comparison_binary_expression::ComparisonBinaryExpression;
+use crate::node::binary_arithmetic_expression::ArithmeticBinaryExpression;
+use crate::node::binary_comparison_expression::ComparisonBinaryExpression;
+use crate::node::binary_expression::BinaryExpression;
+use crate::node::binary_expression::BinaryExpression::{
+    BinaryArithmeticExpression, BinaryComparisonExpression, BinaryLogicalExpression,
+};
+use crate::node::binary_logical_expression::LogicalBinaryExpression;
 use crate::node::literal::Literal;
-use crate::node::logical_binary_expression::LogicalBinaryExpression;
+use crate::node::unary_arithmetic_expression::ArithmeticUnaryExpression;
+use crate::node::unary_expression::UnaryExpression::UnaryArithmeticExpression;
 use crate::node::variable::Variable;
 use crate::operator::{ArithmeticOperator, Operator};
 use crate::token::Token;
@@ -22,14 +27,11 @@ impl Parser {
         }
     }
 
-    pub fn parse(&mut self) -> Result<Box<dyn AstNode>, ParserError> {
+    pub fn parse(&mut self) -> Result<AstNode, ParserError> {
         self.parse_binary_expression(0)
     }
 
-    fn parse_binary_expression(
-        &mut self,
-        min_precedence: u16,
-    ) -> Result<Box<dyn AstNode>, ParserError> {
+    fn parse_binary_expression(&mut self, min_precedence: u16) -> Result<AstNode, ParserError> {
         let mut node = self.parse_primary();
 
         loop {
@@ -46,11 +48,11 @@ impl Parser {
 
                 self.consume_token()?;
 
-                node = Ok(Parser::get_binary_expression(
+                node = Ok(AstNode::BinaryExpression(Parser::get_binary_expression(
                     node?,
                     op,
                     self.parse_binary_expression(precedence + 1)?,
-                ));
+                )));
             } else {
                 break;
             }
@@ -60,21 +62,21 @@ impl Parser {
     }
 
     fn get_binary_expression(
-        left: Box<dyn AstNode>,
+        left: AstNode,
         operator: Operator,
-        right: Box<dyn AstNode>,
-    ) -> Box<dyn AstNode> {
+        right: AstNode,
+    ) -> BinaryExpression {
         match operator {
             Operator::ArithmeticOperator(op) => {
-                Box::new(ArithmeticBinaryExpression::new(left, op, right))
+                BinaryArithmeticExpression(ArithmeticBinaryExpression::new(left, op, right))
             }
 
             Operator::ComparisonOperator(op) => {
-                Box::new(ComparisonBinaryExpression::new(left, op, right))
+                BinaryComparisonExpression(ComparisonBinaryExpression::new(left, op, right))
             }
 
             Operator::LogicalOperator(op) => {
-                Box::new(LogicalBinaryExpression::new(left, op, right))
+                BinaryLogicalExpression(LogicalBinaryExpression::new(left, op, right))
             }
         }
     }
@@ -83,19 +85,21 @@ impl Parser {
         self.tokens.next().ok_or(ParserError::UnexpectedEndOfInput)
     }
 
-    fn parse_primary(&mut self) -> Result<Box<dyn AstNode>, ParserError> {
+    fn parse_primary(&mut self) -> Result<AstNode, ParserError> {
         let token = self.consume_token()?;
 
         match token {
             Token::Operator(Operator::ArithmeticOperator(ArithmeticOperator::Minus)) => {
-                Ok(Box::new(ArithmeticUnaryExpression::new(
-                    ArithmeticOperator::Minus,
-                    self.parse_primary()?,
+                Ok(AstNode::UnaryExpression(UnaryArithmeticExpression(
+                    ArithmeticUnaryExpression::new(
+                        ArithmeticOperator::Minus,
+                        self.parse_primary()?,
+                    ),
                 )))
             }
 
-            Token::Identifier(name) => Ok(Box::new(Variable::new(name))),
-            Token::Number(number) => Ok(Box::new(Literal::new(number))),
+            Token::Identifier(name) => Ok(AstNode::Variable(Variable::new(name))),
+            Token::Number(number) => Ok(AstNode::Literal(Literal::new(number))),
             Token::LParen => {
                 let expr = self.parse()?;
                 self.consume_token()?;

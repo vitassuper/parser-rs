@@ -1,5 +1,5 @@
 use crate::error::ParserError;
-use crate::node::ast_node::{AstNode, Context};
+use crate::node::ast_node::Context;
 use crate::value::Value;
 use std::fmt::{Debug, Formatter};
 
@@ -11,18 +11,8 @@ impl Variable {
     pub fn new(name: String) -> Self {
         Self { name }
     }
-}
 
-impl Debug for Variable {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("Variable")
-            .field("name", &self.name)
-            .finish()
-    }
-}
-
-impl AstNode for Variable {
-    fn evaluate(&self, context: &Context) -> Result<Value, ParserError> {
+    pub fn evaluate(&self, context: &Context) -> Result<Value, ParserError> {
         let value = context.get(&self.name.as_str());
 
         if let Some(value) = value {
@@ -30,5 +20,13 @@ impl AstNode for Variable {
         } else {
             Err(ParserError::EvaluationError)
         }
+    }
+}
+
+impl Debug for Variable {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Variable")
+            .field("name", &self.name)
+            .finish()
     }
 }

@@ -6,24 +6,21 @@ use std::fmt::Debug;
 
 #[derive(Debug)]
 pub struct LogicalBinaryExpression {
-    left: Box<dyn AstNode>,
+    left: Box<AstNode>,
     operator: LogicalOperator,
-    right: Box<dyn AstNode>,
+    right: Box<AstNode>,
 }
 
-// impl BinaryExpression for BooleanBinaryExpression {
 impl LogicalBinaryExpression {
-    pub fn new(left: Box<dyn AstNode>, operator: LogicalOperator, right: Box<dyn AstNode>) -> Self {
+    pub fn new(left: AstNode, operator: LogicalOperator, right: AstNode) -> Self {
         Self {
-            left,
+            left: Box::new(left),
             operator,
-            right,
+            right: Box::new(right),
         }
     }
-}
 
-impl AstNode for LogicalBinaryExpression {
-    fn evaluate(&self, context: &Context) -> Result<Value, ParserError> {
+    pub fn evaluate(&self, context: &Context) -> Result<Value, ParserError> {
         let left_value = self.left.evaluate(context)?;
         let right_value = self.right.evaluate(context)?;
 

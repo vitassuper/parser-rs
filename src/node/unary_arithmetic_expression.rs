@@ -7,18 +7,18 @@ use std::fmt::Debug;
 #[derive(Debug)]
 pub struct ArithmeticUnaryExpression {
     operator: ArithmeticOperator,
-    right: Box<dyn AstNode>,
+    right: Box<AstNode>,
 }
 
-// impl UnaryExpression for ArithmeticUnaryExpression {
 impl ArithmeticUnaryExpression {
-    pub fn new(operator: ArithmeticOperator, right: Box<dyn AstNode>) -> Self {
-        Self { operator, right }
+    pub fn new(operator: ArithmeticOperator, right: AstNode) -> Self {
+        Self {
+            operator,
+            right: Box::new(right),
+        }
     }
-}
 
-impl AstNode for ArithmeticUnaryExpression {
-    fn evaluate(&self, context: &Context) -> Result<Value, ParserError> {
+    pub fn evaluate(&self, context: &Context) -> Result<Value, ParserError> {
         let right_value = self.right.evaluate(context)?;
 
         let result = match self.operator {

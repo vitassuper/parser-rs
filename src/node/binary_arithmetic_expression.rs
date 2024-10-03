@@ -5,31 +5,24 @@ use crate::value::Value;
 
 #[derive(Debug)]
 pub struct ArithmeticBinaryExpression {
-    left: Box<dyn AstNode>,
+    left: Box<AstNode>,
     operator: ArithmeticOperator,
-    right: Box<dyn AstNode>,
+    right: Box<AstNode>,
 }
 
-// impl BinaryExpression for ArithmeticBinaryExpression {
 impl ArithmeticBinaryExpression {
-    pub fn new(
-        left: Box<dyn AstNode>,
-        operator: ArithmeticOperator,
-        right: Box<dyn AstNode>,
-    ) -> Self
+    pub fn new(left: AstNode, operator: ArithmeticOperator, right: AstNode) -> Self
     where
         Self: Sized,
     {
         Self {
-            left,
+            left: Box::new(left),
             operator,
-            right,
+            right: Box::new(right),
         }
     }
-}
 
-impl AstNode for ArithmeticBinaryExpression {
-    fn evaluate(&self, context: &Context) -> Result<Value, ParserError> {
+    pub fn evaluate(&self, context: &Context) -> Result<Value, ParserError> {
         let left_value = self.left.evaluate(context)?;
         let right_value = self.right.evaluate(context)?;
 
